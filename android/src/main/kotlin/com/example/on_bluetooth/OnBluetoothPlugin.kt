@@ -1,5 +1,7 @@
 package com.example.on_bluetooth
 
+import android.annotation.SuppressLint
+import android.bluetooth.BluetoothAdapter
 import androidx.annotation.NonNull
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -21,11 +23,23 @@ class OnBluetoothPlugin: FlutterPlugin, MethodCallHandler {
     channel.setMethodCallHandler(this)
   }
 
+  @SuppressLint("MissingPermission")
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-    if (call.method == "getPlatformVersion") {
-      result.success("Android ${android.os.Build.VERSION.RELEASE}")
-    } else {
-      result.notImplemented()
+    when (call.method) {
+      "getPlatformVersion" -> {
+        result.success("Android ${android.os.Build.VERSION.RELEASE}")
+      }
+      "turnOnBluetooth" -> {
+        var mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        if (mBluetoothAdapter.isEnabled) {
+          result.success(true)
+        } else {
+          result.success(mBluetoothAdapter.enable())
+        }
+      }
+      else -> {
+        result.notImplemented()
+      }
     }
   }
 

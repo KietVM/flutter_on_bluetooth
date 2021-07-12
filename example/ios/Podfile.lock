@@ -1,0 +1,22 @@
+PODS:
+  - Flutter (1.0.0)
+  - on_bluetooth (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - on_bluetooth (from `.symlinks/plugins/on_bluetooth/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  on_bluetooth:
+    :path: ".symlinks/plugins/on_bluetooth/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
+  on_bluetooth: c561bca6eb490139f8ef9bc722140565e687ff9a
+
+PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
+
+COCOAPODS: 1.10.1

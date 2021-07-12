@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
@@ -15,6 +16,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
+  bool bluetoothStatus = false;
 
   @override
   void initState() {
@@ -51,8 +53,25 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+        body: Column(
+          children: [
+            Center(
+              child: Text('Running on: $_platformVersion\n'),
+            ),
+            Text(
+              'Bluetooth Status: ${bluetoothStatus ? 'on' : 'of'}',
+              style: TextStyle(
+                  color: bluetoothStatus ? Colors.blue : Colors.black),
+            ),
+            TextButton(
+                onPressed: () async {
+                  OnBluetooth.turnOnBluetooth();
+                  // setState(() {
+                  //   bluetoothStatus = success;
+                  // });
+                },
+                child: Text('Turn on bluetooth')),
+          ],
         ),
       ),
     );
