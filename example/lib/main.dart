@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
@@ -32,6 +31,7 @@ class _MyAppState extends State<MyApp> {
     try {
       platformVersion =
           await OnBluetooth.platformVersion ?? 'Unknown platform version';
+      syncStatus();
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
@@ -43,6 +43,18 @@ class _MyAppState extends State<MyApp> {
 
     setState(() {
       _platformVersion = platformVersion;
+    });
+  }
+
+  void syncStatus() async {
+    BluetoothStatus status = await OnBluetooth.bluetoothStatus();
+    print('BluetoothStatus $status');
+    setState(() {
+      if (status == BluetoothStatus.on) {
+        bluetoothStatus = true;
+      } else {
+        bluetoothStatus = false;
+      }
     });
   }
 
@@ -65,12 +77,19 @@ class _MyAppState extends State<MyApp> {
             ),
             TextButton(
                 onPressed: () async {
-                  OnBluetooth.turnOnBluetooth();
-                  // setState(() {
-                  //   bluetoothStatus = success;
-                  // });
+                  await OnBluetooth.turnOnBluetooth();
+                  // status bluetooth still have turning_on that not realy
+                  // on need 1s wait it chang ready to on
+                  Future.delayed(Duration(seconds: 1), () {
+                    syncStatus();
+                  });
                 },
                 child: Text('Turn on bluetooth')),
+            TextButton(
+                onPressed: () {
+                  OnBluetooth.requestPermission();
+                },
+                child: Text('Request permission'))
           ],
         ),
       ),

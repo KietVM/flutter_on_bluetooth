@@ -14,6 +14,24 @@ public class SwiftOnBluetoothPlugin: NSObject, FlutterPlugin, CBCentralManagerDe
     case "turnOnBluetooth":
         let _ = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: true])
         break
+    case "statusBluetooth":
+        let blueCentral = CBCentralManager()
+        switch blueCentral.state {
+        case .poweredOn:
+            result("on")
+            break
+        case .unauthorized:
+            result("unauthorized")
+            break
+        default:
+            result("off")
+        }
+        break
+    case "requestPermission":
+        // there is no way to call request permission bluetooth now
+        // so call it pass central manager init
+        let _ = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: true])
+        break
     default:
         result("iOS " + UIDevice.current.systemVersion)
         break
