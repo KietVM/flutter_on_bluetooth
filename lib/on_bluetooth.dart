@@ -36,4 +36,19 @@ class OnBluetooth {
   static void requestPermission() {
     _channel.invokeMethod('requestPermission');
   }
+
+  static void setChannelMethodHandler() {
+    _channel.setMethodCallHandler((call) async {
+      switch (call.method) {
+        case "permissionResult":
+          {
+            final result = call.arguments as bool?;
+            if (result != null) {}
+          }
+          break;
+        default:
+        // do nothing
+      }
+    });
+  }
 }

@@ -33,6 +33,7 @@ class OnBluetoothPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private lateinit var channel : MethodChannel
   private lateinit var context: Context
   private lateinit var activity: Activity
+  val REQUEST_CODE_PERMISSION: Int = 1201
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "on_bluetooth")
@@ -86,7 +87,7 @@ class OnBluetoothPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           ActivityCompat.requestPermissions(activity,
             arrayOf(Manifest.permission.BLUETOOTH,
               Manifest.permission.BLUETOOTH_ADMIN,
-              Manifest.permission.ACCESS_COARSE_LOCATION), 1201)
+              Manifest.permission.ACCESS_COARSE_LOCATION), REQUEST_CODE_PERMISSION)
         } else {
           Log.e("Xdebug", "null activity")
         }
@@ -96,6 +97,8 @@ class OnBluetoothPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       }
     }
   }
+
+
 
   fun havePermission(): Boolean {
     return ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
@@ -111,6 +114,18 @@ class OnBluetoothPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   * */
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
     activity = binding.activity
+    binding.addRequestPermissionsResultListener { requestCode, permissions, grantResults ->
+      if (requestCode == REQUEST_CODE_PERMISSION) {
+        if (grantResults != null && grantResults.isNotEmpty()) {
+          val result = grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                  (grantResults.size >=2 && grantResults[1] == PackageManager.PERMISSION_GRANTED) &&
+                  (grantResults.size >=3 && grantResults[2] == PackageManager.PERMISSION_GRANTED)
+          channel.invokeMethod("permissionResult", result)
+          result
+        }
+      }
+      false
+    }
   }
 
   override fun onDetachedFromActivityForConfigChanges() {

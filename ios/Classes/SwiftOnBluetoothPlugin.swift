@@ -13,6 +13,7 @@ public class SwiftOnBluetoothPlugin: NSObject, FlutterPlugin, CBCentralManagerDe
     switch (call.method) {
     case "turnOnBluetooth":
         let _ = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: true])
+        result("null")
         break
     case "statusBluetooth":
         let blueCentral = CBCentralManager()
