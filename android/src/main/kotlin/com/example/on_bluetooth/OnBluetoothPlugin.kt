@@ -23,6 +23,12 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import android.content.Intent
+
+import android.content.BroadcastReceiver
+
+
+
 
 /** OnBluetoothPlugin */
 class OnBluetoothPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -92,13 +98,51 @@ class OnBluetoothPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           Log.e("Xdebug", "null activity")
         }
       }
+      "listenStateChange" -> {
+        if (activity != null){
+          try {
+            val filter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+            activity.registerReceiver(mReceiver, filter)
+          } catch (e: Exception) {
+            // register duplicate
+          }
+        }
+      }
+      "cancelListenStateChange" -> {
+        if (activity != null) {
+          try {
+            activity.unregisterReceiver(mReceiver)
+          } catch (e: Exception) {
+          // unregister duplicate
+        }
+        }
+      }
       else -> {
         result.notImplemented()
       }
     }
   }
 
-
+  private val mReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+      val action = intent.action
+      if (action == BluetoothAdapter.ACTION_STATE_CHANGED) {
+        val state = intent.getIntExtra(
+          BluetoothAdapter.EXTRA_STATE,
+          BluetoothAdapter.ERROR
+        )
+        activity.runOnUiThread {
+          when (state) {
+            BluetoothAdapter.STATE_OFF -> channel.invokeMethod("blueStateChange", "off")
+            BluetoothAdapter.STATE_TURNING_OFF -> channel.invokeMethod("blueStateChange", "off")
+            BluetoothAdapter.STATE_ON -> channel.invokeMethod("blueStateChange", "on")
+            BluetoothAdapter.STATE_TURNING_ON -> channel.invokeMethod("blueStateChange", "off")
+            else -> channel.invokeMethod("blueStateChange", "off")
+          }
+        }
+      }
+    }
+  }
 
   fun havePermission(): Boolean {
     return ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
@@ -106,6 +150,7 @@ class OnBluetoothPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+    Log.e("Xdebug","onDetachedFromEngine")
     channel.setMethodCallHandler(null)
   }
 

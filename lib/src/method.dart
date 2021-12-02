@@ -5,3 +5,6 @@ const kTurnOnBluetooth = 'turnOnBluetooth';
 
 ///
 const kStatusBluetooth = 'statusBluetooth';
+
+///
+const kBlueStateChange = 'blueStateChange';
