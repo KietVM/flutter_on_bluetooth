@@ -18,16 +18,18 @@ public class SwiftOnBluetoothPlugin: NSObject, FlutterPlugin, CBCentralManagerDe
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+      print("jdlog call \(call.method)")
     switch (call.method) {
     case "turnOnBluetooth":
-        self.centralManager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: true])
+        self.centralManager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: true, CBConnectPeripheralOptionNotifyOnConnectionKey:true, CBConnectPeripheralOptionNotifyOnDisconnectionKey: true])
         result(true)
         break
     case "statusBluetooth":
         if (self.centralManager == nil) {
-            self.centralManager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: true])
+            self.centralManager = CBCentralManager(delegate: self, queue: nil, options:  [CBCentralManagerOptionShowPowerAlertKey: false])
+            self.centralManager?.scanForPeripherals(withServices: nil, options: nil)
         }
-        print("statusBluetooth \(self.centralManager!.state.rawValue)")
+//        print("statusBluetooth \(self.centralManager!.state.rawValue)")
         switch self.centralManager!.state {
         case .poweredOn:
             print("statusBluetooth on")
@@ -45,10 +47,13 @@ public class SwiftOnBluetoothPlugin: NSObject, FlutterPlugin, CBCentralManagerDe
     case "requestPermission":
         // there is no way to call request permission bluetooth now
         // so call it pass central manager init
-        self.centralManager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: true])
+        self.centralManager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: true, CBConnectPeripheralOptionNotifyOnConnectionKey:true, CBConnectPeripheralOptionNotifyOnDisconnectionKey: true])
         break
     case "listenStateChange":
-        self.centralManager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: true])
+        if (self.centralManager == nil) {
+            self.centralManager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: false])
+            self.centralManager?.scanForPeripherals(withServices: nil, options: nil)
+        }
         break
     case "cancelListenStateChange":
         // no need to do anything now
@@ -59,7 +64,7 @@ public class SwiftOnBluetoothPlugin: NSObject, FlutterPlugin, CBCentralManagerDe
     }
   }
    public func centralManagerDidUpdateState(_ central: CBCentralManager) {
-       print("central manager update \(central.state)")
+    //    print("central manager update \(central.state)")
        switch central.state {
        case .poweredOn:
            methodChannel.invokeMethod("blueStateChange", arguments: "on")
