@@ -47,18 +47,21 @@ class OnBluetoothPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     context = flutterPluginBinding.applicationContext
   }
 
-  @SuppressLint("MissingPermission")
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
     when (call.method) {
       "getPlatformVersion" -> {
         result.success("Android ${android.os.Build.VERSION.RELEASE}")
       }
       "turnOnBluetooth" -> {
-        var mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        if (mBluetoothAdapter.isEnabled) {
-          result.success(true)
+        if (havePermission()) {
+          var mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+          if (mBluetoothAdapter.isEnabled) {
+            result.success(true)
+          } else {
+            result.success(mBluetoothAdapter.enable())
+          }
         } else {
-          result.success(mBluetoothAdapter.enable())
+          result.success(false)
         }
       }
       "statusBluetooth" -> {
@@ -114,7 +117,7 @@ class OnBluetoothPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             activity.unregisterReceiver(mReceiver)
           } catch (e: Exception) {
           // unregister duplicate
-        }
+          }
         }
       }
       else -> {
@@ -150,8 +153,15 @@ class OnBluetoothPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-    Log.e("Xdebug","onDetachedFromEngine")
+//    Log.e("Xdebug","onDetachedFromEngine")
     channel.setMethodCallHandler(null)
+    if (activity != null) {
+      try {
+        activity.unregisterReceiver(mReceiver)
+      } catch (e: Exception) {
+        // unregister duplicate
+      }
+    }
   }
 
   /*
